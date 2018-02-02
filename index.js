@@ -3,43 +3,30 @@ const fs = require("fs");
 const path = require("path");
 const mkdirp = require("mkdirp");
 const Handlebars = require("handlebars");
-const Visitor = Handlebars.Visitor;
 
-// helpers for getting items in the templates directory
-const templatePathHelper = templateName =>
-  path.join(__dirname, `/templates/${templateName}`);
-const templateFilePathHelper = (templateName, fileName) =>
-  path.join(__dirname, `/templates/${templateName}/${fileName}`);
+const {
+  templatePathHelper,
+  templateFilePathHelper,
+  getTemplateDirectoriesAndFiles,
+  VariableScanner
+} = require("./utils");
 
-// check if the templates directory exists
-if (fs.existsSync(path.join(__dirname, "/templates"))) {
-  // get the directories or files in the templates directory
-  const dirAndFiles = getTemplateDirectoriesAndFiles();
-  // it exists so kick off the questioning process
-  whichTemplateToUse(dirAndFiles);
-} else {
-  console.log(
-    "No 'templates' directory was found. Please make sure that exists and try again!"
-  );
+// start!
+function start() {
+  // check if the templates directory exists
+  if (fs.existsSync(path.join(__dirname, "/templates"))) {
+    // get the directories or files in the templates directory
+    const dirAndFiles = getTemplateDirectoriesAndFiles();
+    // it exists so kick off the questioning process
+    whichTemplateToUse(dirAndFiles);
+  } else {
+    console.log(
+      "No 'templates' directory was found. Please make sure that exists and try again!"
+    );
+  }
 }
 
-function getTemplateDirectoriesAndFiles() {
-  // get all directories or files
-  const dirAndFiles = fs.readdirSync(path.join(__dirname, "/templates")).reduce(
-    (prev, current) => {
-      if (fs.lstatSync(templatePathHelper(current)).isDirectory()) {
-        prev.dirs.push(current);
-      } else if (fs.lstatSync(templatePathHelper(current)).isFile()) {
-        prev.files.push(current);
-      }
-      return prev;
-    },
-    { dirs: [], files: [] }
-  );
-
-  return dirAndFiles;
-}
-
+// ask the user which templates they want to use
 function whichTemplateToUse(dirAndFiles) {
   inquirer
     .prompt({
@@ -58,6 +45,7 @@ function whichTemplateToUse(dirAndFiles) {
     });
 }
 
+// open the file(s) that the user aksed for
 function openTemplate(template) {
   let templateContents;
   // check if the template is a file or a directory
@@ -83,19 +71,7 @@ function openTemplate(template) {
   getVariables(templateContents);
 }
 
-// HACK - this is a hack to get the variables from a handlebars template
-class VariableScanner extends Visitor {
-  constructor() {
-    super();
-    this.variables = new Set();
-  }
-
-  MustacheStatement(mus) {
-    // map over the parts - but make sure to get rid of duplicates by using set
-    mus.path.parts.map(m => this.variables.add(m));
-  }
-}
-
+// get the variables in the file(s) the user asked for so we can then ask the user to fill them in
 function getVariables(files) {
   // get the variables from the provided template
   const scanner = new VariableScanner();
@@ -108,6 +84,7 @@ function getVariables(files) {
   compileFiles([...scanner.variables], files);
 }
 
+// ask the user to fill in the variables and then compile the files with answers they provided
 function compileFiles(variables, files) {
   // ask the user to fill in all of the variables
   // generate questions
@@ -134,6 +111,7 @@ function compileFiles(variables, files) {
   });
 }
 
+// write the file(s) out to the filesystem
 function createFiles(files) {
   // ask the user where they want to output the files
   inquirer
@@ -146,7 +124,7 @@ function createFiles(files) {
       // look for the directory the user specified and either create it or use
       mkdirp(path.join(__dirname, `/${directoryToPlaceFiles}`), err => {
         if (err) {
-          console.error(error);
+          console.error(err);
         }
         // map over all of the files and place them in their new home!
         files.map(file => {
@@ -164,3 +142,6 @@ function createFiles(files) {
         The following files were created ${files.map(file => file.name)}`);
     });
 }
+
+// kick off the cli!
+start();
