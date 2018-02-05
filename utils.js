@@ -6,39 +6,28 @@ const Visitor = Handlebars.Visitor;
 
 const cwd = process.cwd();
 // helpers for getting items in the templates directory
-const templatePathHelper = (templateName /*: string */) =>
+const templatePathHelper = templateName =>
   path.join(cwd, `/templates/${templateName}`);
 
-const templateFilePathHelper = (
-  templateName /*: string */,
-  fileName /*: string */
-) => path.join(cwd, `/templates/${templateName}/${fileName}`);
-
-/*::
-type dirAndFiles = {
-  dir: string[],
-  files: string[]
-};
-*/
+const templateFilePathHelper = (templateName, fileName) =>
+  path.join(cwd, `/templates/${templateName}/${fileName}`);
 
 /**
  * Get all of the file and directory names from the './templates/' folder
  */
-function getTemplateDirectoriesAndFiles() /*: dirAndFiles */ {
+function getTemplateDirectoriesAndFiles() {
   // get all directories or files
-  const dirAndFiles /*: dirAndFiles */ = fs
-    .readdirSync(path.join(cwd, "/templates"))
-    .reduce(
-      (prev, current) => {
-        if (fs.lstatSync(templatePathHelper(current)).isDirectory()) {
-          prev.dirs.push(current);
-        } else if (fs.lstatSync(templatePathHelper(current)).isFile()) {
-          prev.files.push(current);
-        }
-        return prev;
-      },
-      { dirs: [], files: [] }
-    );
+  const dirAndFiles = fs.readdirSync(path.join(cwd, "/templates")).reduce(
+    (prev, current) => {
+      if (fs.lstatSync(templatePathHelper(current)).isDirectory()) {
+        prev.dirs.push(current);
+      } else if (fs.lstatSync(templatePathHelper(current)).isFile()) {
+        prev.files.push(current);
+      }
+      return prev;
+    },
+    { dirs: [], files: [] }
+  );
 
   return dirAndFiles;
 }
@@ -50,7 +39,7 @@ class VariableScanner extends Visitor {
     this.variables = new Set();
   }
 
-  MustacheStatement(mus /*: any */) {
+  MustacheStatement(mus) {
     // map over the parts - but make sure to get rid of duplicates by using set
     mus.path.parts.map(m => this.variables.add(m));
   }

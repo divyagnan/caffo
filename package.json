@@ -4,11 +4,9 @@
   "description": "CLI to quickly scaffold you app",
   "main": "index.js",
   "scripts": {
-    "test": "npm run flow && npm run ava",
+    "test": "npm run ava",
     "ava": "ava",
-    "coverage": "nyc --all ava",
-    "flow": "flow",
-    "glow": "glow"
+    "coverage": "nyc --all ava"
   },
   "author": "Divyagnan",
   "license": "MIT",
@@ -19,8 +17,6 @@
   },
   "devDependencies": {
     "ava": "^0.25.0",
-    "flow-bin": "^0.64.0",
-    "glow": "^1.1.2",
     "mock-fs": "^4.4.2",
     "nyc": "^11.4.1"
   }
