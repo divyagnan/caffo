@@ -4,14 +4,15 @@ const fs = require("fs");
 const Handlebars = require("handlebars");
 const Visitor = Handlebars.Visitor;
 
+const cwd = process.cwd();
 // helpers for getting items in the templates directory
 const templatePathHelper = (templateName /*: string */) =>
-  path.join(__dirname, `/templates/${templateName}`);
+  path.join(cwd, `/templates/${templateName}`);
 
 const templateFilePathHelper = (
   templateName /*: string */,
   fileName /*: string */
-) => path.join(__dirname, `/templates/${templateName}/${fileName}`);
+) => path.join(cwd, `/templates/${templateName}/${fileName}`);
 
 /*::
 type dirAndFiles = {
@@ -26,7 +27,7 @@ type dirAndFiles = {
 function getTemplateDirectoriesAndFiles() /*: dirAndFiles */ {
   // get all directories or files
   const dirAndFiles /*: dirAndFiles */ = fs
-    .readdirSync(path.join(__dirname, "/templates"))
+    .readdirSync(path.join(cwd, "/templates"))
     .reduce(
       (prev, current) => {
         if (fs.lstatSync(templatePathHelper(current)).isDirectory()) {

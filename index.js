@@ -11,10 +11,12 @@ const {
   VariableScanner
 } = require("./utils");
 
+const cwd = process.cwd();
+
 // start!
 function start() {
   // check if the templates directory exists
-  if (fs.existsSync(path.join(__dirname, "/templates"))) {
+  if (fs.existsSync(path.join(cwd, "/templates"))) {
     // get the directories or files in the templates directory
     const dirAndFiles = getTemplateDirectoriesAndFiles();
     // it exists so kick off the questioning process
@@ -122,14 +124,14 @@ function createFiles(files) {
     })
     .then(({ directoryToPlaceFiles }) => {
       // look for the directory the user specified and either create it or use
-      mkdirp(path.join(__dirname, `/${directoryToPlaceFiles}`), err => {
+      mkdirp(path.join(cwd, `/${directoryToPlaceFiles}`), err => {
         if (err) {
           console.error(err);
         }
         // map over all of the files and place them in their new home!
         files.map(file => {
           fs.writeFileSync(
-            path.join(__dirname, `/${directoryToPlaceFiles}/${file.name}`),
+            path.join(cwd, `/${directoryToPlaceFiles}/${file.name}`),
             file.content
           );
         });
