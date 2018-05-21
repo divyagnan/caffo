@@ -4,19 +4,19 @@
   "description": "CLI to quickly scaffold you app",
   "main": "index.js",
   "scripts": {
-    "test": "npm run ava",
-    "ava": "ava",
-    "coverage": "nyc --all ava"
+    "test": "jest"
   },
   "author": "Divyagnan",
   "license": "MIT",
   "dependencies": {
     "handlebars": "^4.0.11",
     "inquirer": "^5.0.1",
-    "mkdirp": "^0.5.1"
+    "mkdirp": "^0.5.1",
+    "prompts": "^0.1.8"
   },
   "devDependencies": {
     "ava": "^0.25.0",
+    "jest": "^22.4.4",
     "mock-fs": "^4.4.2",
     "nyc": "^11.4.1"
   }

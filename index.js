@@ -1,4 +1,4 @@
-const inquirer = require("inquirer");
+const prompts = require("prompts");
 const fs = require("fs");
 const path = require("path");
 const mkdirp = require("mkdirp");
@@ -29,22 +29,16 @@ function start() {
 }
 
 // ask the user which templates they want to use
-function whichTemplateToUse(dirAndFiles) {
-  inquirer
-    .prompt({
-      type: "list",
-      name: "templateToUse",
-      message: "Which template would you like to use?",
-      choices: [
-        new inquirer.Separator("Directories"),
-        ...dirAndFiles.dirs,
-        new inquirer.Separator("Files"),
-        ...dirAndFiles.files
-      ]
-    })
-    .then(answer => {
-      openTemplate(answer.templateToUse);
-    });
+async function whichTemplateToUse(dirAndFiles) {
+  const answer = await prompts({
+    type: "select",
+    name: "templateToUse",
+    message: "Which template would you like to use?",
+    choices: [...dirAndFiles.dirs, ...dirAndFiles.files],
+    initial: 1
+  });
+
+  openTemplate(answer.templateToUse);
 }
 
 // open the file(s) that the user aksed for
@@ -87,63 +81,65 @@ function getVariables(files) {
 }
 
 // ask the user to fill in the variables and then compile the files with answers they provided
-function compileFiles(variables, files) {
+async function compileFiles(variables, files) {
   // ask the user to fill in all of the variables
   // generate questions
   const questions = variables.map(variable => ({
-    type: "input",
+    type: "text",
     name: variable,
     message: `What should the {{${variable}}} variable be replaced with?`
   }));
 
-  inquirer.prompt(questions).then(answers => {
-    // map through the files and compile each file providing the variable answers
-    const compiledFiles = files.map(file => {
-      const template = Handlebars.compile(file.content);
-      const filledTemplate = template(answers);
+  const answers = await prompts(questions);
 
-      return {
-        name: file.name,
-        content: filledTemplate
-      };
-    });
+  // map through the files and compile each file providing the variable answers
+  const compiledFiles = files.map(file => {
+    const template = Handlebars.compile(file.content);
+    const filledTemplate = template(answers);
 
-    // pass the compiled contents to be created
-    createFiles(compiledFiles);
+    return {
+      name: file.name,
+      content: filledTemplate
+    };
   });
+
+  // pass the compiled contents to be created
+  createFiles(compiledFiles);
 }
 
 // write the file(s) out to the filesystem
-function createFiles(files) {
+async function createFiles(files) {
   // ask the user where they want to output the files
-  inquirer
-    .prompt({
-      type: "input",
-      name: "directoryToPlaceFiles",
-      message: `In which directory should your new file(s) be placed?`
-    })
-    .then(({ directoryToPlaceFiles }) => {
-      // look for the directory the user specified and either create it or use
-      mkdirp(path.join(cwd, `/${directoryToPlaceFiles}`), err => {
-        if (err) {
-          console.error(err);
-        }
-        // map over all of the files and place them in their new home!
-        files.map(file => {
-          fs.writeFileSync(
-            path.join(cwd, `/${directoryToPlaceFiles}/${file.name}`),
-            file.content
-          );
-        });
-      });
+  const answer = await prompts({
+    type: "text",
+    name: "directoryToPlaceFiles",
+    message: "In which directory should your new file(s) be placed?"
+  });
 
-      // let the user know everything is complete
-      console.log(`
-        All done! 
-        Your new files should be /${directoryToPlaceFiles}
-        The following files were created ${files.map(file => file.name)}`);
+  // look for the directory the user specified and either create it or use
+  mkdirp(path.join(cwd, `/${answer.directoryToPlaceFiles}`), err => {
+    if (err) {
+      console.error(err);
+    }
+    // map over all of the files and place them in their new home!
+    files.map(file => {
+      fs.writeFileSync(
+        path.join(cwd, `/${answer.directoryToPlaceFiles}/${file.name}`),
+        file.content
+      );
     });
+  });
+
+  // let the user know everything is complete
+  console.log(
+    `
+        All done! 
+        Your new files should be /${answer.directoryToPlaceFiles}
+        The following files were created ${files.map(file => file.name)}`
+  );
 }
 
 // kick off the cli!
 start();
+
+module.exports = start;

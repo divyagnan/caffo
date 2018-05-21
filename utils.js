@@ -17,17 +17,17 @@ const templateFilePathHelper = (templateName, fileName) =>
  */
 function getTemplateDirectoriesAndFiles() {
   // get all directories or files
-  const dirAndFiles = fs.readdirSync(path.join(cwd, "/templates")).reduce(
-    (prev, current) => {
-      if (fs.lstatSync(templatePathHelper(current)).isDirectory()) {
-        prev.dirs.push(current);
-      } else if (fs.lstatSync(templatePathHelper(current)).isFile()) {
-        prev.files.push(current);
-      }
-      return prev;
-    },
-    { dirs: [], files: [] }
-  );
+  const dirAndFiles = fs.readdirSync(path.join(cwd, "/templates")).reduce((
+    prev,
+    current
+  ) => {
+    if (fs.lstatSync(templatePathHelper(current)).isDirectory()) {
+      prev.dirs.push({ title: current, value: current });
+    } else if (fs.lstatSync(templatePathHelper(current)).isFile()) {
+      prev.files.push({ title: current, value: current });
+    }
+    return prev;
+  }, { dirs: [], files: [] });
 
   return dirAndFiles;
 }

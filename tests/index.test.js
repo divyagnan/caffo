@@ -1,29 +1,26 @@
-import test from "ava";
-import mock from "mock-fs";
-import Handlebars from "handlebars";
-import { getTemplateDirectoriesAndFiles, VariableScanner } from "../utils";
+const fs = require("fs");
+const path = require("path");
+const prompts = require("prompts");
+const Handlebars = require("handlebars");
+const start = require("../index");
+const {
+  getTemplateDirectoriesAndFiles,
+  VariableScanner,
+  templateFilePathHelper
+} = require("../utils");
 
-test("properly gets template directories and files", t => {
-  mock({
-    templates: {
-      "template.js": "",
-      emptyTemplateDirectory: {}
-    }
-  });
-
+test("properly gets template directories and files", () => {
   const testVal = getTemplateDirectoriesAndFiles();
 
   const expectedVal = {
-    dirs: ["emptyTemplateDirectory"],
-    files: ["template.js"]
+    dirs: [{ title: "connectedComponent", value: "connectedComponent" }],
+    files: [{ title: "reactTemplate.js", value: "reactTemplate.js" }]
   };
 
-  t.deepEqual(testVal, expectedVal);
-
-  mock.restore();
+  expect(testVal).toEqual(expectedVal);
 });
 
-test("properly gets variables from a handlebars template", t => {
+test("properly gets variables from a handlebars template", () => {
   const fakeFile = `
     {{varOne}} {{varTwo}} {{varThree}} 
     {{varOne}} {{varTwo}} {{varThree}}
@@ -34,5 +31,35 @@ test("properly gets variables from a handlebars template", t => {
 
   const expectedVal = ["varOne", "varTwo", "varThree"];
 
-  t.deepEqual([...scanner.variables], expectedVal);
+  expect([...scanner.variables]).toEqual(expectedVal);
+});
+
+test("e2e", () => {
+  // inject values for testing
+  prompts.inject({
+    templateToUse: "connectedComponent",
+    componentName: "testComponent",
+    lib: "testLib",
+    rootClass: "testClass",
+    directoryToPlaceFiles: "tests/testOutputFolder"
+  });
+
+  start();
+
+  setTimeout(() => {
+    // get the files from the expected directory
+    const fileNames = fs.readdirSync(
+      path.join(process.cwd(), "/tests/testOutputFolder")
+    );
+
+    const fileContents = fileNames.map(fileName => ({
+      name: fileName,
+      content: fs.readFileSync(
+        path.join(process.cwd(), `/tests/testOutputFolder/${fileName}`),
+        "utf8"
+      )
+    }));
+
+    expect(fileContents).toMatchSnapshot();
+  }, 5000);
 });

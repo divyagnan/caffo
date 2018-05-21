@@ -1,0 +1,7 @@
+.{{componentName}} {
+    color: red;
+}
+
+.{{rootClass}} {
+    color: black;
+}

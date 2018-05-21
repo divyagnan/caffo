@@ -1,0 +1,32 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`e2e 1`] = `
+Array [
+  Object {
+    "content": ".testComponent {
+    color: red;
+}
+
+.testClass {
+    color: black;
+}",
+    "name": "component.css",
+  },
+  Object {
+    "content": "import React from \\"react\\"
+import testLib from \\"testLib\\"
+import \\"./testComponent.css\\"
+
+class testComponent extends React.Component {
+    render() {
+        return (
+            <div className=\\"testClass\\">Hi from testComponent</div>
+        )
+    }
+}
+
+export default testComponent",
+    "name": "component.js",
+  },
+]
+`;
