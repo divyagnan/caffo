@@ -4,6 +4,7 @@
   "description": "CLI to quickly scaffold you app",
   "main": "index.js",
   "bin": "./index.js",
+  "preferGlobal": true,
   "scripts": {
     "test": "jest",
     "release": "np"
