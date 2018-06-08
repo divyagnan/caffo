@@ -2,7 +2,6 @@ const fs = require("fs");
 const path = require("path");
 const prompts = require("prompts");
 const Handlebars = require("handlebars");
-const start = require("../index");
 const {
   getTemplateDirectoriesAndFiles,
   VariableScanner,
@@ -34,32 +33,32 @@ test("properly gets variables from a handlebars template", () => {
   expect([...scanner.variables]).toEqual(expectedVal);
 });
 
-test("e2e", () => {
-  // inject values for testing
-  prompts.inject({
-    templateToUse: "connectedComponent",
-    componentName: "testComponent",
-    lib: "testLib",
-    rootClass: "testClass",
-    directoryToPlaceFiles: "tests/testOutputFolder"
-  });
+// test("e2e", () => {
+//   // inject values for testing
+//   prompts.inject({
+//     templateToUse: "connectedComponent",
+//     componentName: "testComponent",
+//     lib: "testLib",
+//     rootClass: "testClass",
+//     directoryToPlaceFiles: "tests/testOutputFolder"
+//   });
 
-  start();
+//   start();
 
-  setTimeout(() => {
-    // get the files from the expected directory
-    const fileNames = fs.readdirSync(
-      path.join(process.cwd(), "/tests/testOutputFolder")
-    );
+//   setTimeout(() => {
+//     // get the files from the expected directory
+//     const fileNames = fs.readdirSync(
+//       path.join(process.cwd(), "/tests/testOutputFolder")
+//     );
 
-    const fileContents = fileNames.map(fileName => ({
-      name: fileName,
-      content: fs.readFileSync(
-        path.join(process.cwd(), `/tests/testOutputFolder/${fileName}`),
-        "utf8"
-      )
-    }));
+//     const fileContents = fileNames.map(fileName => ({
+//       name: fileName,
+//       content: fs.readFileSync(
+//         path.join(process.cwd(), `/tests/testOutputFolder/${fileName}`),
+//         "utf8"
+//       )
+//     }));
 
-    expect(fileContents).toMatchSnapshot();
-  }, 5000);
-});
+//     expect(fileContents).toMatchSnapshot();
+//   }, 5000);
+// });
