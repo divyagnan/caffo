@@ -1,6 +1,6 @@
 {
   "name": "caffo",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "CLI to quickly scaffold you app",
   "main": "index.js",
   "scripts": {
